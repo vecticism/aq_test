@@ -26,20 +26,22 @@ def process_text(input_text, mode, incremental):
         sentences = nltk.sent_tokenize(input_text)
         for sentence in sentences:
             sanitized_sentence = sanitize_text(sentence)
-            if incremental:
-                results.extend(incremental_aq_values(sanitized_sentence))
-            else:
-                aq_value = alphanumeric_qabbala_sum(sanitized_sentence)
-                results.append((sanitized_sentence, aq_value))
+            if sanitized_sentence:
+                if incremental:
+                    results.extend(incremental_aq_values(sanitized_sentence))
+                else:
+                    aq_value = alphanumeric_qabbala_sum(sanitized_sentence)
+                    results.append((sanitized_sentence, aq_value))
     else:  # Poetry
         lines = input_text.split('\n')
         for line in lines:
             sanitized_line = sanitize_text(line)
-            if incremental:
-                results.extend(incremental_aq_values(sanitized_line))
-            else:
-                aq_value = alphanumeric_qabbala_sum(sanitized_line)
-                results.append((sanitized_line, aq_value))
+            if sanitized_line:
+                if incremental:
+                    results.extend(incremental_aq_values(sanitized_line))
+                else:
+                    aq_value = alphanumeric_qabbala_sum(sanitized_line)
+                    results.append((sanitized_line, aq_value))
     return results
 
 # Calculate incremental AQ values
@@ -113,13 +115,10 @@ if 'results' in st.session_state:
         df = df[df['AQ Value'].isin(search_values)]
 
     # Sortable table
-    st.dataframe(df)
-
-    # Revert order button
-    if st.button("Revert to Original Order"):
-        st.session_state['results'] = st.session_state['original_results']
-        df = pd.DataFrame(st.session_state['results'], columns=['Line/Sentence', 'AQ Value'])
-        st.dataframe(df)
+    st.write(df.style.set_table_styles([
+        {'selector': 'thead th', 'props': [('background-color', '#f1f1f1'), ('color', 'black'), ('font-weight', 'bold'), ('text-align', 'center')]},
+        {'selector': 'tbody tr', 'props': [('text-align', 'center')]}
+    ]).hide(axis='index'))
 
     st.write("Download Options:")
 
