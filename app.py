@@ -64,6 +64,14 @@ def save_to_excel(results):
     buffer.seek(0)
     return buffer
 
+# Save results to CSV
+def save_to_csv(results):
+    df = pd.DataFrame(results, columns=['Line/Sentence', 'AQ Value'])
+    buffer = BytesIO()
+    df.to_csv(buffer, index=False)
+    buffer.seek(0)
+    return buffer
+
 # Save results to plain text
 def save_to_text(results):
     text_output = "\n".join(f"{line} | AQ Value: {aq_value}" for line, aq_value in results)
@@ -74,7 +82,8 @@ st.set_page_config(page_title="AQ Calc")
 
 st.title("Alphanumeric Qabbala Calculator")
 
-st.markdown('<small>For more tools and information see: <a href="https://alektryon.github.io/gematro/" target="_blank">https://alektryon.github.io/gematro/</a></small>', unsafe_allow_html=True)
+# Centered links and text
+st.markdown('<div style="text-align: center;"><small>For more tools and information see: <a href="https://alektryon.github.io/gematro/" target="_blank">https://alektryon.github.io/gematro/</a></small><br><small>Inspired by <a href="https://x.com/albanoquintani" target="_blank">@albanoquintani</a> and <a href="https://x.com/xenocosmography" target="_blank">@xenocosmography</a></small></div>', unsafe_allow_html=True)
 
 # Add a toggle button for prose or poetry
 mode = st.radio("Select mode:", ('Poetry (calculates by line breaks)', 'Prose (calculates by end of sentence)'))
@@ -122,8 +131,8 @@ if 'results' in st.session_state:
 
     st.write("Download Options:")
 
-    # Create download buttons for Excel and Text files
-    col3, col4 = st.columns([1, 1])
+    # Create download buttons for Excel, CSV, and Text files
+    col3, col4, col5 = st.columns([1, 1, 1])
     with col3:
         excel_data = save_to_excel(st.session_state['results'])
         st.download_button(
@@ -133,6 +142,14 @@ if 'results' in st.session_state:
             mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         )
     with col4:
+        csv_data = save_to_csv(st.session_state['results'])
+        st.download_button(
+            label="Download CSV",
+            data=csv_data,
+            file_name='aq_values.csv',
+            mime='text/csv'
+        )
+    with col5:
         text_data = save_to_text(st.session_state['results'])
         st.download_button(
             label="Download Text",
