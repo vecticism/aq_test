@@ -70,7 +70,11 @@ def save_to_text(results):
     return text_output.encode()
 
 # Streamlit UI
-st.title("Alphanumeric Qabbala Calculator (Test Version)")
+st.set_page_config(page_title="AQ Calc")
+
+st.title("Alphanumeric Qabbala Calculator")
+
+st.markdown('<small>For more tools and information see: <a href="https://alektryon.github.io/gematro/" target="_blank">https://alektryon.github.io/gematro/</a></small>', unsafe_allow_html=True)
 
 # Add a toggle button for prose or poetry
 mode = st.radio("Select mode:", ('Poetry (calculates by line breaks)', 'Prose (calculates by end of sentence)'))
@@ -87,7 +91,7 @@ def clear_text():
     st.experimental_rerun()
 
 # Text input area
-text_input = st.text_area("Enter text:", height=300, value=st.session_state['text'], key="text_input")
+text_input = st.text_area("Enter text:", height=300, key="text_input")
 
 # Buttons to calculate AQ values and clear text
 col1, col2 = st.columns([1, 1])
@@ -96,7 +100,6 @@ with col1:
         st.session_state['text'] = st.session_state['text_input']
         results = process_text(st.session_state['text'], 'Prose' if 'Prose' in mode else 'Poetry', incremental)
         st.session_state['results'] = results
-        st.session_state['original_results'] = results
 
 with col2:
     if st.button("Clear Text"):
@@ -115,26 +118,25 @@ if 'results' in st.session_state:
         df = df[df['AQ Value'].isin(search_values)]
 
     # Sortable table
-    st.write(df.style.set_table_styles([
-        {'selector': 'thead th', 'props': [('background-color', '#f1f1f1'), ('color', 'black'), ('font-weight', 'bold'), ('text-align', 'center')]},
-        {'selector': 'tbody tr', 'props': [('text-align', 'center')]}
-    ]).hide(axis='index'))
+    st.dataframe(df, width=700)
 
     st.write("Download Options:")
 
     # Create download buttons for Excel and Text files
-    excel_data = save_to_excel(st.session_state['results'])
-    st.download_button(
-        label="Download Excel",
-        data=excel_data,
-        file_name='aq_values.xlsx',
-        mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    )
-
-    text_data = save_to_text(st.session_state['results'])
-    st.download_button(
-        label="Download Text",
-        data=text_data,
-        file_name='aq_values.txt',
-        mime='text/plain'
-    )
+    col3, col4 = st.columns([1, 1])
+    with col3:
+        excel_data = save_to_excel(st.session_state['results'])
+        st.download_button(
+            label="Download Excel",
+            data=excel_data,
+            file_name='aq_values.xlsx',
+            mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+    with col4:
+        text_data = save_to_text(st.session_state['results'])
+        st.download_button(
+            label="Download Text",
+            data=text_data,
+            file_name='aq_values.txt',
+            mime='text/plain'
+        )
